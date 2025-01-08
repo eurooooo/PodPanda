@@ -4,6 +4,7 @@ import { useState } from "react";
 export default function SourcesPanel({ setAudioUrl }) {
   const [isLoading, setIsLoading] = useState(false);
   const [pdfFile, setPdfFile] = useState(null);
+  const [podcastUrl, setPodcastUrl] = useState("");
   const apiUrl = "http://localhost:8000";
 
   const handlePDFUpload = (event) => {
@@ -26,13 +27,22 @@ export default function SourcesPanel({ setAudioUrl }) {
         const formData = new FormData();
         formData.append("file", pdfFile);
 
-        response = await fetch(`${apiUrl}/upload-pdf`, {
+        response = await fetch(`${apiUrl}/pdf`, {
           method: "POST",
           body: formData,
         });
+      } else if (podcastUrl) {
+        // Handle URL to podcast
+        response = await fetch(`${apiUrl}/url`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ url: podcastUrl }),
+        });
       } else {
         // Fallback to original URL endpoint
-        response = await fetch(`${apiUrl}/local-audio`);
+        response = await fetch(`${apiUrl}/local`);
       }
 
       const blob = await response.blob();
@@ -55,6 +65,16 @@ export default function SourcesPanel({ setAudioUrl }) {
           accept=".pdf"
           onChange={handlePDFUpload}
           className="block w-full text-sm text-slate-500 file:mr-4 file:rounded-full file:border-0 file:bg-violet-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-violet-700 hover:file:bg-violet-100"
+        />
+      </div>
+
+      <div className="mb-4">
+        <input
+          type="text"
+          placeholder="Enter podcast URL"
+          value={podcastUrl}
+          onChange={(e) => setPodcastUrl(e.target.value)}
+          className="block w-full rounded border px-4 py-2 text-sm text-slate-500"
         />
       </div>
 
